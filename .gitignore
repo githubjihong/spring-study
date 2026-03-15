@@ -13,3 +13,6 @@ target
 
 ### SVN
 .svn
+
+### config file
+/src/main/resources/application.properties
