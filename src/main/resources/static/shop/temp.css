@@ -1,0 +1,50 @@
+/* 헤더에 배경 넣기 */
+.artist-group-header {
+	/*   padding: 1rem 1.5rem; */
+	border-radius: 12px;
+	/*   background: linear-gradient(90deg, #00c4b4, #27e2d1); */
+	color: white;
+	/*   display: flex; */
+	align-items: center;
+	/*   gap: 10px; */
+	/*   margin-bottom: 1.5rem; */
+	padding: 0px 0px 0px 0px !important;
+}
+
+.artist-group-header .header-badge {
+	background: #ffbb00;
+	color: #fff;
+	font-size: 0.8rem;
+	padding: 2px 8px;
+	border-radius: 12px;
+	font-weight: 600;
+}
+
+/* 그룹 전체를 감싸는 카드 스타일 */
+.artist-group-card {
+	background-color: #ffffff;
+	border-radius: 20px;
+	box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+	padding: 2rem;
+	margin-bottom: 3rem;
+	transition: box-shadow 0.3s ease;
+}
+
+.artist-group-card:hover {
+	box-shadow: 0 10px 28px rgba(0, 0, 0, 0.08);
+}
+
+/* 그룹 헤더 */
+.artist-group-header {
+	display: flex;
+	align-items: center;
+	margin-bottom: 2.0rem;
+}
+
+.artist-group-name {
+	font-size: 1.5rem;
+	font-weight: 700;
+	color: #333;
+	margin: 0;
+}
+
