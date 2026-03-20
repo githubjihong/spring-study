@@ -141,7 +141,7 @@
 	        
 	        <!-- 굿즈샵 탭 -->
 	        <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
-			  <c:forEach var="artistGroupVO" items="${artistGroupVOList}">
+			  <c:forEach var="artistGroupVO" items="${artistGroupGoodsList}">
 			    <div class="card">
 			      <div class="card-header" style="background-color: #dee2e6;">
 			        <!-- 그룹 헤더 -->
@@ -203,14 +203,14 @@
 			  <!-- card Body -->    
 			  <div class="card-body">
 			    <!-- button 영역 -->
-	          	<c:forEach var="artistGroupVO" items="${topArtistsList}">
+	          	<c:forEach var="artistGroupVO" items="${topArtistGoodsList}">
 	          	  <button class="card-artistNm ${artistGroupVO.rnum == 1 ? 'active' : ''}" value="${artistGroupVO.artGroupNo}">${artistGroupVO.artGroupNm}</button>
 	          	</c:forEach>
 				
 				<div class="d-flex flex-wrap gap-3 pt-3" id="topArtistList">
 				  <!-- topArtist가 비어있을 때 처리 -->
 				  <c:choose>
-				    <c:when test="${empty topArtist}">
+				    <c:when test="${empty topArtistGoodsList}">
 				      <!-- 텍스트 -->
 					  <div class="custom-card-text">
 					    <h5 class="card-title">해당 상품이 존재 하지 않습니다.</h5><br>
@@ -218,7 +218,7 @@
 				    </c:when>
 				    
 				    <c:otherwise>
-				      <c:forEach var="artistGroupVO" items="${topArtist}">
+				      <c:forEach var="artistGroupVO" items="${topArtistGoodsList}">
 				        <c:forEach var="goodsVO" items="${artistGroupVO.goodsVOList}">
 				          <div class="custom-card">
 				            <!-- 이미지 -->

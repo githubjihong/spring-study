@@ -1,5 +1,7 @@
 package com.ohot.shop.controller;
 
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
+
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
@@ -42,7 +44,9 @@ import com.ohot.home.community.service.ArtistGroupNoticeService;
 import com.ohot.home.community.vo.ArtistGroupNoticeVO;
 import com.ohot.home.community.vo.CommunityProfileVO;
 import com.ohot.mapper.CommonCodeGroupMapper;
+import com.ohot.mapper.CommonTaskMgmtMapper;
 import com.ohot.mapper.SeqGeneratorMapper;
+import com.ohot.mapper.SysConfigInfoMapper;
 import com.ohot.service.BannerFileService;
 import com.ohot.service.MemberService;
 import com.ohot.shop.service.PaymentService;
@@ -55,9 +59,11 @@ import com.ohot.shop.vo.ShippingInfoVO;
 import com.ohot.vo.ArtistGroupVO;
 import com.ohot.vo.BannerFileVO;
 import com.ohot.vo.CommonCodeGroupVO;
+import com.ohot.vo.CommonTaskMemtVO;
 import com.ohot.vo.CustomUser;
 import com.ohot.vo.MemberVO;
 import com.ohot.vo.SeqGeneratorVO;
+import com.ohot.vo.SysConfigInfoVO;
 import com.ohot.vo.UsersVO;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -70,16 +76,23 @@ import lombok.extern.slf4j.Slf4j;
 public class ShopController {
 	
 	@Autowired
-	ShopService shopService;
-	
-	@Autowired
-	MemberService memberService;
-	
-	@Autowired
 	CommonCodeGroupMapper commonCodeGroupMapper;
 	
 	@Autowired
 	SeqGeneratorMapper seqGeneratorMapper;
+	
+	@Autowired
+	CommonTaskMgmtMapper commonTaskMgmtMapper;
+	
+	@Autowired
+	SysConfigInfoMapper sysConfigInfoMapper;
+	
+	
+	@Autowired
+	ShopService shopService;
+	
+	@Autowired
+	MemberService memberService;
 	
 	@Autowired
 	TicketService ticketService;
@@ -119,96 +132,151 @@ public class ShopController {
 	
 	/* shop Main Home Page */
 	@GetMapping("/home")
-	public String goodsForm(Model model, @AuthenticationPrincipal CustomUser customUser, String tkCtgr) {
+	public String goodsForm(Model model
+							, @AuthenticationPrincipal CustomUser customUser
+							, String tkCtgr
+							, HttpServletRequest request) {
+
+		//BannerList
+		String requestURI = request.getRequestURI();
+		CommonTaskMemtVO commonTaskMemt = this.commonTaskMgmtMapper.getCommonTaskMemt(requestURI);
+		List<BannerFileVO> bannerFileVOList = bannerFileService.bannerFileList(commonTaskMemt.getTaskSeNm());
 		
+		//Recommended Artist List
 		UsersVO usersVO = null;
-		
-		List<CommunityProfileVO> communityProfileVOList = null;
-		List<ArtistGroupVO> artistGroupVOList = null;
-		
-		
-		//로그인 여부에 따라 Recommended Artist 조회목록 출력
+		SysConfigInfoVO configKeyVO = null;
+		int total = 0;
+		int totalPage = 0;
+		int currentPage = 1;
+		int size = 0;
 		if(customUser != null) {
 			usersVO = customUser.getUsersVO();
-			
-			//Recommended Artist 조회
-			communityProfileVOList = shopService.communityProfileList(usersVO);
-			
-		}
-		
-
-		//artist 목록이 없을 때 처리
-		if(communityProfileVOList == null || communityProfileVOList.isEmpty()) {
-			
-			//Recommended Artist 조회
-			model.addAttribute("title", "Recommended Artist");
-			
-			//비 회원이거나 아티스트 그룹 목록이 없을 때 출력
-			communityProfileVOList = shopService.communityProfileBaseList();
-			
-			//아티스트 그룹번호 조회
-			List<Integer> artistGroupNoList = new ArrayList<Integer>();
-			for (CommunityProfileVO communityProfileVO : communityProfileVOList) {
-				artistGroupNoList.add(communityProfileVO.getArtistGroupVO().getArtGroupNo());
-			}
-			
-			log.info("artistGroupNoList : " + artistGroupNoList);
-			
-			artistGroupVOList = shopService.artstGroupBaseList(artistGroupNoList);
-			
-		}else {	//회원이면서 아티스트 그룹 목록이 있을 때 출력
-			//artistGroupVOList 조회
-			artistGroupVOList = shopService.artstGroupList(usersVO);
-			log.info("artistGroupVOList 값은 : " + artistGroupVOList);
+			configKeyVO = this.sysConfigInfoMapper.getConfigKey("LOGIN_USER_ARTIST_VAL");
 			model.addAttribute("title", "My Artist");
+			
+		}else {
+			usersVO = new UsersVO();
+			configKeyVO = this.sysConfigInfoMapper.getConfigKey("NO_LOGIN_USER_ARTIST_VAL");
+			model.addAttribute("title", "Recommended Artist"); //추후 JSP에서 처리할 수 있도록 개선
 		}
 		
-		model.addAttribute("artistGroupVOList", artistGroupVOList);
-		model.addAttribute("communityProfileVOList", communityProfileVOList);
+		usersVO.setSysConfigInfoVO(configKeyVO);
+		List<CommunityProfileVO> communityProfileVOList = shopService.communityProfileList(usersVO);
 		
-		//BannerList
-		//TASK_SE_NM(업무구분명으로 조회)
-		String taskSeNm = "shop";
-		List<BannerFileVO> bannerFileVOList = bannerFileService.bannerFileList(taskSeNm);
-		log.info("bannerFileVOList : " + bannerFileVOList);
+		//Artist TotalPage
+		configKeyVO = this.sysConfigInfoMapper.getConfigKey("MYARTIST_MAX_VAL");
+		if(customUser != null) {
+			total = shopService.getMyArtistTotal(usersVO);
+		}else {
+			total = Integer.parseInt(configKeyVO.getConfigVal());
+		}
 		
-		//artist 그룹목록(최상위3개-굿즈 판매량 순) 가져오기
-		int limit = 3;
-		List<ArtistGroupVO> topArtistsList = shopService.topArtistsList(limit);
-		log.info("topArtistsList : " + topArtistsList);
+		size = Integer.parseInt(configKeyVO.getConfigVal()); 
+		totalPage = (int) Math.ceil((double) total / size);
 		
-		//artist 최상위그룹(1번)에 대한 굿즈 목록 가져오기
-		ArtistGroupVO artistGroupVO = topArtistsList.get(0);
-		List<ArtistGroupVO> topArtist = shopService.topArtistGoodsList(artistGroupVO); 
-		log.info("topArtist : " + topArtist);
+		if(totalPage < 1) totalPage = 1;
+		
+		//굿즈 리스트 목록 가져오기
+		List<ArtistGroupVO> artistGroupGoodsList = shopService.artistGroupGoodsList(communityProfileVOList);
 		
 		//티켓 리스트 목록 가져오기
 		List<GoodsVO> goodsVOList = this.ticketService.ticketList(tkCtgr);
-		log.info("ticketList -> GoodsVO : "+goodsVOList);
 		
-		//totalPage 구하기
-		int total = artistGroupVOList.size();
-		int size = 9;
-		int totalPage = (int) Math.ceil((double) total / size);
+		//굿즈 판매량 누적 순위 가져오기
+		configKeyVO = this.sysConfigInfoMapper.getConfigKey("TOP_GOODS_VAL");
+		List<ArtistGroupVO> topArtistGoodsList = shopService.getTopArtistGoodsList(configKeyVO);
 		
-		log.info("totalPage : " + totalPage);
-		
-		//currentPage setting
-		int currentPage = 1;
+		//model
+		model.addAttribute("bannerFileVOList", bannerFileVOList);
+		model.addAttribute("communityProfileVOList", communityProfileVOList);
+		model.addAttribute("goodsVOList", goodsVOList);
+		model.addAttribute("artistGroupGoodsList", artistGroupGoodsList);
+		model.addAttribute("topArtistGoodsList", topArtistGoodsList);
 		
 		model.addAttribute("currentPage", currentPage);
 		model.addAttribute("totalPage", totalPage);
-		model.addAttribute("topArtistsList", topArtistsList);
-		model.addAttribute("topArtist", topArtist);
-		model.addAttribute("bannerFileVOList", bannerFileVOList);
-		model.addAttribute("goodsVOList", goodsVOList);
-		
-		//artist 목록 가져오기
-		List<ArtistGroupVO> artistGroupList = shopService.artistGroupList();
-		model.addAttribute("artistGroupList", artistGroupList);
 		
 		return "shop/home";
 	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	
 	//Artist 구독 리스트 페이지 출력
 	@ResponseBody

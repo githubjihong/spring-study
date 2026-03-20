@@ -17,6 +17,7 @@ import com.ohot.shop.vo.OrdersVO;
 import com.ohot.shop.vo.ShippingInfoVO;
 import com.ohot.util.UploadController;
 import com.ohot.vo.ArtistGroupVO;
+import com.ohot.vo.SysConfigInfoVO;
 import com.ohot.vo.UsersVO;
 
 import lombok.extern.slf4j.Slf4j;
@@ -30,12 +31,6 @@ public class ShopImpl implements ShopService{
 	
 	@Autowired
 	UploadController uploadController;
-
-	
-	@Override
-	public List<CommunityProfileVO> communityProfileBaseList() {
-		return shopMapper.communityProfileBaseList();
-	}
 	
 	@Override
 	public List<CommunityProfileVO> communityProfileList(UsersVO usersVO) {
@@ -43,24 +38,45 @@ public class ShopImpl implements ShopService{
 	}
 	
 	@Override
-	public List<ArtistGroupVO> artstGroupBaseList(List<Integer> artistGroupNoList) {
-		// TODO Auto-generated method stub
-		return shopMapper.artstGroupBaseList(artistGroupNoList);
+	public List<ArtistGroupVO> getTopArtistGoodsList(SysConfigInfoVO configKeyVO) {
+		return shopMapper.getTopArtistGoodsList(configKeyVO);
 	}
 	
 	@Override
-	public List<ArtistGroupVO> artstGroupList(UsersVO usersVO) {
-		return shopMapper.artstGroupList(usersVO);
+	public int getMyArtistTotal(UsersVO usersVO) {
+		return shopMapper.getMyArtistTotal(usersVO);
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	@Override
+	public List<ArtistGroupVO> artistGroupGoodsList(List<CommunityProfileVO> communityProfileVOList) {
+		return shopMapper.artistGroupGoodsList(communityProfileVOList);
+	}
+	
+	@Override
+	public List<CommunityProfileVO> communityProfileBaseList() {
+		return shopMapper.communityProfileBaseList();
+	}
+	
+	@Override
+	public List<ArtistGroupVO> artstGroupBaseList(List<Integer> artistGroupNoList) {
+		// TODO Auto-generated method stub
+		return shopMapper.artstGroupBaseList(artistGroupNoList);
 	}
 
 	@Override
 	public GoodsVO goodsDetail(GoodsVO goodsVO) {
 		return shopMapper.goodsDetail(goodsVO);
-	}
-
-	@Override
-	public List<ArtistGroupVO> topArtistsList(int limit) {
-		return shopMapper.topArtistsList(limit);
 	}
 
 	@Override

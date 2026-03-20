@@ -9,20 +9,34 @@ import com.ohot.shop.vo.MemberShopVO;
 import com.ohot.shop.vo.OrdersVO;
 import com.ohot.shop.vo.ShippingInfoVO;
 import com.ohot.vo.ArtistGroupVO;
+import com.ohot.vo.SysConfigInfoVO;
 import com.ohot.vo.UsersVO;
 
 public interface ShopService {
-	public List<CommunityProfileVO> communityProfileBaseList();
-
+	
 	public List<CommunityProfileVO> communityProfileList(UsersVO usersVO);
 
-	public List<ArtistGroupVO> artstGroupList(UsersVO usersVO);
+	public List<ArtistGroupVO> artistGroupGoodsList(List<CommunityProfileVO> communityProfileVOList);
+	
+	public List<ArtistGroupVO> getTopArtistGoodsList(SysConfigInfoVO configKeyVO);
+
+	public int getMyArtistTotal(UsersVO usersVO);
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	public List<CommunityProfileVO> communityProfileBaseList();
 	
 	public List<ArtistGroupVO> artstGroupBaseList(List<Integer> artistGroupNoList);
 
 	public GoodsVO goodsDetail(GoodsVO goodsVO);
-
-	public List<ArtistGroupVO> topArtistsList(int limit);
 
 	public List<ArtistGroupVO> topArtistGoodsList(ArtistGroupVO artistGroupVO);
 
@@ -55,5 +69,7 @@ public interface ShopService {
 	public String getMemberShipCheck(CommunityProfileVO communityProfileVO);
 
 	public CommunityProfileVO findComProfileNoCheck(MemberShopVO memberShopVO);
+
+	
 	
 }

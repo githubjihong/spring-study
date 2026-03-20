@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 매퍼interface의 풀경로명을 매퍼XML의 namespace속성의 값으로 쓰면 둘이 연결됨 -->
+<mapper namespace="com.ohot.mapper.SysConfigInfoMapper">
+	
+	<!-- CONFIG_KEY 행 반환 -->	
+	<select id="getConfigKey" parameterType="string" resultType="com.ohot.vo.SysConfigInfoVO">
+		/* com.ohot.mapper.SysConfigInfoMapper.getConfigKey */
+		
+		SELECT CONFIG_KEY
+			 , CONFIG_VAL
+			 , CONFIG_NM
+			 , USE_YN
+		  FROM SYS_CONFIG_INFO
+	 	 WHERE CONFIG_KEY = #{configKey}
+	</select>
+</mapper>
