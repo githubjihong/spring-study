@@ -3,6 +3,7 @@ package com.ohot.vo;
 import java.util.List;
 
 import com.ohot.employee.vo.DepartmentVO;
+import com.ohot.util.PageUtil;
 
 import lombok.Data;
 
@@ -28,5 +29,6 @@ public class UsersVO {
 	
 	private SysConfigInfoVO sysConfigInfoVO;
 	
+	private PageUtil pageUtil;
 	
 }

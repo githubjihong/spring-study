@@ -1,13 +1,9 @@
 package com.ohot.shop.controller;
 
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
-
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
-import java.security.interfaces.RSAPrivateCrtKey;
 import java.security.interfaces.RSAPublicKey;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -20,6 +16,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -36,7 +33,6 @@ import com.nimbusds.jose.EncryptionMethod;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWEAlgorithm;
 import com.nimbusds.jose.JWEHeader;
-import com.nimbusds.jose.crypto.RSADecrypter;
 import com.nimbusds.jose.crypto.RSAEncrypter;
 import com.nimbusds.jwt.EncryptedJWT;
 import com.nimbusds.jwt.JWTClaimsSet;
@@ -49,13 +45,13 @@ import com.ohot.mapper.SeqGeneratorMapper;
 import com.ohot.mapper.SysConfigInfoMapper;
 import com.ohot.service.BannerFileService;
 import com.ohot.service.MemberService;
-import com.ohot.shop.service.PaymentService;
 import com.ohot.shop.service.ShopService;
 import com.ohot.shop.service.TicketService;
 import com.ohot.shop.vo.GoodsVO;
 import com.ohot.shop.vo.MemberShopVO;
 import com.ohot.shop.vo.OrdersVO;
 import com.ohot.shop.vo.ShippingInfoVO;
+import com.ohot.util.PageUtil;
 import com.ohot.vo.ArtistGroupVO;
 import com.ohot.vo.BannerFileVO;
 import com.ohot.vo.CommonCodeGroupVO;
@@ -71,6 +67,7 @@ import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
+@CrossOrigin("*")
 @Controller
 @RequestMapping("/shop")
 public class ShopController {
@@ -102,6 +99,8 @@ public class ShopController {
 	
 	@Autowired
 	ArtistGroupNoticeService artistGroupNoticeService;
+	
+	PageUtil pageUtil;
 	
 	// /shop 시리즈의 공통  model
 	@ModelAttribute
@@ -136,7 +135,10 @@ public class ShopController {
 							, @AuthenticationPrincipal CustomUser customUser
 							, String tkCtgr
 							, HttpServletRequest request) {
-
+		
+		
+		
+		/*
 		//BannerList
 		String requestURI = request.getRequestURI();
 		CommonTaskMemtVO commonTaskMemt = this.commonTaskMgmtMapper.getCommonTaskMemt(requestURI);
@@ -145,36 +147,28 @@ public class ShopController {
 		//Recommended Artist List
 		UsersVO usersVO = null;
 		SysConfigInfoVO configKeyVO = null;
-		int total = 0;
-		int totalPage = 0;
-		int currentPage = 1;
-		int size = 0;
+		
 		if(customUser != null) {
 			usersVO = customUser.getUsersVO();
 			configKeyVO = this.sysConfigInfoMapper.getConfigKey("LOGIN_USER_ARTIST_VAL");
-			model.addAttribute("title", "My Artist");
-			
 		}else {
 			usersVO = new UsersVO();
 			configKeyVO = this.sysConfigInfoMapper.getConfigKey("NO_LOGIN_USER_ARTIST_VAL");
-			model.addAttribute("title", "Recommended Artist"); //추후 JSP에서 처리할 수 있도록 개선
 		}
 		
 		usersVO.setSysConfigInfoVO(configKeyVO);
 		List<CommunityProfileVO> communityProfileVOList = shopService.communityProfileList(usersVO);
 		
 		//Artist TotalPage
+		Map<String, Object> pageInit = null;
 		configKeyVO = this.sysConfigInfoMapper.getConfigKey("MYARTIST_MAX_VAL");
 		if(customUser != null) {
-			total = shopService.getMyArtistTotal(usersVO);
+			pageInit = PageInit(configKeyVO, shopService.getMyArtistTotal(usersVO));
 		}else {
-			total = Integer.parseInt(configKeyVO.getConfigVal());
+			pageInit = PageInit(configKeyVO, 0);
 		}
 		
-		size = Integer.parseInt(configKeyVO.getConfigVal()); 
-		totalPage = (int) Math.ceil((double) total / size);
 		
-		if(totalPage < 1) totalPage = 1;
 		
 		//굿즈 리스트 목록 가져오기
 		List<ArtistGroupVO> artistGroupGoodsList = shopService.artistGroupGoodsList(communityProfileVOList);
@@ -193,28 +187,87 @@ public class ShopController {
 		model.addAttribute("artistGroupGoodsList", artistGroupGoodsList);
 		model.addAttribute("topArtistGoodsList", topArtistGoodsList);
 		
-		model.addAttribute("currentPage", currentPage);
-		model.addAttribute("totalPage", totalPage);
+		model.addAttribute("currentPage", pageInit.get("currentPage"));
+		model.addAttribute("totalPage", pageInit.get("totalPage"));
+		*/
 		
 		return "shop/home";
 	}
 	
+	@ResponseBody
+	@GetMapping("/homeAjax")
+	public Map<String,Object> goodsFormAjax(@AuthenticationPrincipal CustomUser customUser, HttpServletRequest request) {
+		
+		Map<String,Object> map = new HashMap<String,Object>();
+		
+		//Recommended Artist List
+		UsersVO usersVO = null;
+		SysConfigInfoVO configKeyVO = null;
+		
+		if(customUser != null) {
+			usersVO = customUser.getUsersVO();
+			configKeyVO = this.sysConfigInfoMapper.getConfigKey("LOGIN_USER_ARTIST_VAL");
+			
+		}else {
+			usersVO = new UsersVO();
+			configKeyVO = this.sysConfigInfoMapper.getConfigKey("NO_LOGIN_USER_ARTIST_VAL");
+		}
+		
+		//BannerList
+		String requestURI = request.getRequestURI();
+		CommonTaskMemtVO commonTaskMemt = this.commonTaskMgmtMapper.getCommonTaskMemt(requestURI);
+		List<BannerFileVO> bannerFileVOList = bannerFileService.bannerFileList(commonTaskMemt.getTaskSeNm());
+		
+		//CommunitProfileList
+		usersVO.setSysConfigInfoVO(configKeyVO);
+		
+		//PageInit config
+		int total;
+		if(customUser != null) {
+			total = shopService.getMyArtistTotal(usersVO);
+		}else {
+			total = Integer.parseInt(configKeyVO.getConfigVal());
+		}
+		
+		int blockSize = Integer.parseInt(configKeyVO.getConfigVal());
+		pageUtil = new PageUtil(total, blockSize, 1);
+		usersVO.setPageUtil(pageUtil);
+		
+		List<CommunityProfileVO> communityProfileVOList = shopService.communityProfileList(usersVO);
+		
+		map.put("bannerFileVOList", bannerFileVOList);
+		map.put("communityProfileVOList", communityProfileVOList);
+		map.put("pageUtil", pageUtil);
+		
+		return map;
+	}
 	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+	@ResponseBody
+	@PostMapping("/getCommunityProfileListAjax")
+	public Map<String,Object> getCommunityProfileList(@AuthenticationPrincipal CustomUser customUser, 
+			 										  @RequestBody Map<String, Object> data){
+		
+		Map<String,Object> map = new HashMap<String,Object>();
+		
+		//Recommended Artist List
+		UsersVO usersVO = null;
+		
+		if(customUser != null) {
+			usersVO = customUser.getUsersVO();
+			
+		}else {
+			usersVO = new UsersVO();
+		}
+		
+		int currentPage = (int)data.get("currentPage");
+		pageUtil.setCurrentPage(currentPage);
+		usersVO.setPageUtil(pageUtil);
+		
+		List<CommunityProfileVO> communityProfileVOList = shopService.communityProfileList(usersVO);
+		map.put("communityProfileVOList", communityProfileVOList);
+		
+		return map;
+	}
 	
 	
 	

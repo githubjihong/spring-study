@@ -38,11 +38,17 @@ public class WebConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(localeChangeInterceptor());
         
+        /*
         registry.addInterceptor(loginInterceptor())
         		.addPathPatterns("/shop/**")
         		.excludePathPatterns(
         				  "/shop/*.css"
+        				, "/shop/*.js"
         				, "/shop/home"
+        				, "/shop/*Ajax"
         		);
+        */
+        
+        
     }
 }

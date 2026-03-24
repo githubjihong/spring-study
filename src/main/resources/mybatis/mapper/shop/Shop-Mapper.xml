@@ -105,30 +105,36 @@
 		/* com.ohot.shop.mapper.ShopMapper.communityProfileList */
 		
 		WITH TOP_GROUPS AS (
-    		SELECT ART_GROUP_NO
-     			 , ART_GROUP_NM
-     			 , FILE_GROUP_NO
-     		  FROM ( SELECT ART_GROUP_NO
-     					  , ART_GROUP_NM
-     					  , FILE_GROUP_NO
-     					  , COUNT(*) AS ART_CNT
-  					   FROM ( SELECT B.ART_GROUP_NO
-             					   , B.ART_GROUP_NM
-             					   , B.FILE_GROUP_NO
-          						FROM COMMUNITY_PROFILE A INNER JOIN ARTIST_GROUP B 
-          						  ON (A.ART_GROUP_NO = B.ART_GROUP_NO AND B.ART_GROUP_DEL_YN  = 'N')
-         					   WHERE COM_DELYN = 'N' 
-           						 AND B.ART_GROUP_NO != 0
-           						 <choose>
-             						<when test='userNo != null and userNo != ""'>
-             							AND A.MEM_NO = #{userNo}
-             						</when>
-             					</choose>
-           			   		)	 
-					    GROUP BY ART_GROUP_NO, ART_GROUP_NM, FILE_GROUP_NO
-						ORDER BY ART_CNT DESC, ART_GROUP_NM ASC    
-					 )
-					 WHERE ROWNUM BETWEEN 1 AND #{sysConfigInfoVO.configVal}
+		SELECT ART_GROUP_NO
+     		 , ART_GROUP_NM
+     		 , FILE_GROUP_NO
+		  FROM(
+	    		SELECT ART_GROUP_NO
+	     			 , ART_GROUP_NM
+	     			 , FILE_GROUP_NO
+	     			 , ROWNUM AS RNUM
+	     		  FROM ( SELECT ART_GROUP_NO
+	     					  , ART_GROUP_NM
+	     					  , FILE_GROUP_NO
+	     					  , COUNT(*) AS ART_CNT
+	  					   FROM ( SELECT B.ART_GROUP_NO
+	             					   , B.ART_GROUP_NM
+	             					   , B.FILE_GROUP_NO
+	          						FROM COMMUNITY_PROFILE A INNER JOIN ARTIST_GROUP B 
+	          						  ON (A.ART_GROUP_NO = B.ART_GROUP_NO AND B.ART_GROUP_DEL_YN  = 'N')
+	         					   WHERE COM_DELYN = 'N' 
+	           						 AND B.ART_GROUP_NO != 0
+	           						 <choose>
+	             						<when test='userNo != null and userNo != ""'>
+	             							AND A.MEM_NO = #{userNo}
+	             						</when>
+	             					</choose>
+	           			   		)	 
+						    GROUP BY ART_GROUP_NO, ART_GROUP_NM, FILE_GROUP_NO
+							ORDER BY ART_CNT DESC, ART_GROUP_NM ASC
+					)
+			)
+			WHERE RNUM BETWEEN #{pageUtil.startRow} AND #{pageUtil.endRow}
 		),
 
 		LATEST_FILE_DETAIL AS (

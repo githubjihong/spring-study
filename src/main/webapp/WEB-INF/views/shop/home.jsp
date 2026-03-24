@@ -8,6 +8,7 @@
 <head>
 <meta charset="UTF-8">
 <link rel="stylesheet" href="${pageContext.request.contextPath}/shop/main.css" />
+<script src="${pageContext.request.contextPath}/shop/main.js"></script>
 <link rel="icon" href="/images/oHoT_logo.png">
 <title>oHoT Shop</title>
 
@@ -17,50 +18,30 @@
 	
 	<!-- banner 영역 -->
 	<div id="banner" class="carousel slide" data-bs-ride="carousel">
-	  <div class="carousel-indicators">
-	  	<!-- carousl button 제어 status.index: 현재 List 번호 -->
-	    <c:forEach varStatus="status" items="${bannerFileVOList}">
-	    	<button type="button" data-bs-target="#banner" data-bs-slide-to="${status.index}" 
-	    	  class="${status.index == 0 ? 'active' : ''}" aria-current="true" aria-label="Slide ${status.index}"></button>
-	    </c:forEach>
+	  <div class="carousel-indicators" id="carousel-indicators">
+	    <template id="banner-template">
+	   		<button type="button" data-bs-target="#banner" data-bs-slide-to="" class="" aria-current="true" aria-label="Slide"></button>
+	    </template>
 	  </div>
 	  
-	  <div class="carousel-inner" style="background: #dee2e6;">
-	    <!-- banner List 출력 -->
-	    <c:set var="count" value="0"></c:set>
-	    <c:forEach var="bannerFileVO" items="${bannerFileVOList}">
-	      <c:forEach var="fileDetailVO" items="${bannerFileVO.fileGroupVO.fileDetailVOList}">
-	        <!-- 캐러셀 시작 시간조정: data-bs-interval="1000" -->
-	        <div class="carousel-item ${count == 0 ? 'active' : ''}">
-	          <div class="row" style="background: #dee2e6;">
-	            <!-- 하나의 col 안에 이미지 + 텍스트 정렬 -->
-	             <div class="col-12 d-flex align-items-center">
-	               <!-- 왼쪽: 이미지 -->
-	               <img src="/upload${fileDetailVO.fileSaveLocate}" class="img-fluid" alt="banner image" />
-	               <!-- 오른쪽: 텍스트 -->
-	               <div>
-	                 <c:choose>
-					   <c:when test="${count == 0}">
-					     <h2 class="fw-bold">2025 RIIZE WE LITTLE RIIZE</h2>
-	                     <p>POP UP 2차 공식 상품 예약 판매</p>
-					   </c:when>
-					   <c:when test="${count == 1}">
-					     <h2 class="fw-bold">2025 NCT WISH The 2nd Mini Album</h2>
-	                     <p>[poppop] 공식 상품 예약 판매</p>
-					   </c:when>
-					   <c:when test="${count == 2}">
-					     <h2 class="fw-bold">WOW MEMBERSHIP RENEWAL!</h2>
-	                     <p>지금 바로 확인하세요</p>
-					   </c:when>
-					 </c:choose>
-	               </div>
+	  <div class="carousel-inner carousel-inner-background">
+	    <template id="carousel-inner-template">
+	  	  <div class="carousel-item">
+	        <div class="row carousel-inner-background">
+	          <!-- 하나의 col 안에 이미지 + 텍스트 정렬 -->
+	          <div class="col-12 d-flex align-items-center">
+	            <!-- 왼쪽: 이미지 -->
+	            <img src="" class="img-fluid" alt="banner image" />
+	            <!-- 오른쪽: 텍스트 -->
+	            <div class="carousel-inner-item">
+	              <h2></h2>
+	              <p></p>
 	            </div>
 	          </div>
 	        </div>
-	        <c:set var="count" value="${count + 1}" />
-	      </c:forEach>
-	    </c:forEach>
-	  </div> 
+	      </div>
+	    </template>
+	  </div>
 	  
 	  <!-- pre Button -->
 	  <button class="carousel-control-prev" type="button" data-bs-target="#banner" data-bs-slide="prev">
@@ -80,34 +61,34 @@
 	<div class="row d-flex justify-content-center">
 	  <div class="col-8 rounded-shadow">
 	    <!-- header 영역 -->
-	    <div class="artist-title">
-	      ${title}
-	    </div>
+	    <div class="artist-header"></div>
+	  	
 	  	<div class="card-group">
-	  	  
-	   	  <!-- forEach 시작 -->
-	      <div class="d-flex justify-content-start" id="artistTitle">
-	        <c:forEach var="communityProfileVO" items="${communityProfileVOList}">
-	          <!-- 수평 배치 -->
-	          <div class="card artist-card">
-	            <a href="/shop/artistGroup?artGroupNo=${communityProfileVO.artGroupNo}">
-	              <img src="/upload${communityProfileVO.artistGroupVO.fileGroupVO.fileDetailVOList[0].fileSaveLocate}" 
-		   	        class="img-fluid artist-avatar" style="width: 100px; height: 100px; object-fit: cover;" alt="${communityProfileVO.artistGroupVO.fileGroupVO.fileDetailVOList[0].fileOriginalName}"/>
+	      <div class="d-flex justify-content-start" id="artist-title">
+	        <template id="artist-title-template">
+	      	  <div class="card artist-card">
+	            <a href="/shop/artistGroup?artGroupNo=">
+	              <img src="/upload" class="img-fluid artist-avatar" alt=""/>
 	            </a>
 	            <div class="card-body text-center p-1">
-	              <h5 class="card-title card-title-home multiline-ellipsis-line1 mt-3">${communityProfileVO.artistGroupVO.artGroupNm}</h5>
+	              <h5 class="card-title card-title-home multiline-ellipsis-line1 mt-3"></h5>
 	            </div>
 	          </div>
-	        </c:forEach>
+	        </template>
 	      </div>
 	    </div>
 	    
 	    <!-- Arist Page 영역 -->
 	    <div class="d-flex justify-content-center">
-	      <input type="hidden" id="totalPage" value="${totalPage}">
-	      <button id="prev" type="button" value="${currentPage}" class="btn btn-sm disabled" style="background-color: white">&lt;</button>
-	      <span id="currentPage" class="mx-3">${currentPage} / ${totalPage}</span>
-	      <button id="next" type="button" value="${currentPage}" class="btn btn-sm" style="background-color: white">&gt;</button>
+	      <button id="prev" type="button" class="btn btn-sm arist-page">&lt;</button>
+	      <div class="mx-3">
+	      	  <input type="hidden" value="" id="totalPage">
+	      	  <input type="hidden" value="" id="currentPage">
+		      <span id="currentPageSpan"></span>
+		      <span>/</span>
+		      <span id="totalPageSpan"></span>
+	      </div>
+	      <button id="next" type="button"class="btn btn-sm arist-page">&gt;</button>
 	    </div>
 	  </div>
 	</div>
@@ -255,6 +236,23 @@
 </body>
 
 <script type="text/javascript">
+
+document.addEventListener("DOMContentLoaded", () => {
+    startApp();
+});
+
+
+
+
+
+
+
+
+
+
+
+
+/*
 $('#prev').on('click', function(){
 	let currentPage = $(this).val();
 	--currentPage;
@@ -271,6 +269,8 @@ $('#next').on('click', function(){
 		artistPageList(currentPage);
 	}
 })
+
+*/
 
 function artistPageList(currentPage){
 	const datas = {
