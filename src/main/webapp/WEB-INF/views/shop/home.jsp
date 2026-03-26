@@ -102,7 +102,7 @@
 	      <div class="card-header p-0">
 	        <ul class="nav nav-tabs d-flex w-100" id="myTab" role="tablist">
 	          <li class="nav-item flex-fill text-center" role="presentation">
-	            <button class="nav-link w-100 active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home"
+	            <button class="nav-link w-100 active" id="home-tab" data-bs-toggle="tab" data-bs-target="#goods"
 	                    type="button" role="tab" aria-controls="home" aria-selected="true">
 	              굿즈샵
 	            </button>
@@ -119,115 +119,96 @@
 	      <!-- 카드 바디 (탭 콘텐츠 포함) -->
 	      <div class="card-body">
 	        <div class="tab-content" id="myTabContent">
-	        
 	        <!-- 굿즈샵 탭 -->
-	        <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
-			  <c:forEach var="artistGroupVO" items="${artistGroupGoodsList}">
-			    <div class="card">
-			      <div class="card-header" style="background-color: #dee2e6;">
+	        <div class="tab-pane fade show active" id="goods" role="tabpanel" aria-labelledby="goods">
+	          <div class="card">
+	            <!-- template 영역 -->
+			  </div>
+	        </div>
+			  
+			  <template id="card-header-template">
+				  <div class="card-header">
 			        <!-- 그룹 헤더 -->
 			        <div class="d-flex flex-column">
-			          <a href="/shop/artistGroup?artGroupNo=${artistGroupVO.artGroupNo}">
+			          <a href="">
 					    <span class="header-badge mb-2">Now</span>
-					    <h3 class="artist-groupName text-left">${artistGroupVO.artGroupNm}</h3>
+					    <h3 class="artist-groupName text-left"></h3>
 					  </a>
-					</div>
-			      </div>
-			      
+				    </div>
+			      </div>			    
+			    </template>
+				
+				<template id="card-body-template">
 			      <div class="card-body">
 				    <div class="d-flex flex-wrap gap-3 pt-3">
-			          <c:forEach var="goodsVO" items="${artistGroupVO.goodsVOList}">
-			            <div class="custom-card">
-			              <!-- 이미지 -->
-			              <a href="/shop/artistGroup/${artistGroupVO.artGroupNo}/detail/${goodsVO.gdsNo}">
-			                <c:choose>
-			                  <c:when test="${ not empty goodsVO.fileGroupVO.fileDetailVOList[0].fileSaveLocate}">
-			                    <img class="card-img-top img-fluid" src="/upload/${goodsVO.fileGroupVO.fileDetailVOList[0].fileSaveLocate}" onerror=this.src='/images/noImage.png' alt="굿즈 이미지">
-			                  </c:when>
-			                  <c:otherwise>
-			                    <img class="card-img-top img-fluid" src="/images/noImage.png" alt="이미지 없음">
-			                  </c:otherwise>
-			                </c:choose>
-			              </a>
-			              <!-- 텍스트 -->
-						  <div class="custom-card-text">
-						    <h5 class="card-title multiline-ellipsis-line1">${goodsVO.gdsNm}</h5><br>
-						    <p class="card-price text-left">
-						      ₩ <fmt:formatNumber value="${goodsVO.unitPrice}" pattern="#,###" />
-						    </p>
-						  </div>
-			            </div>
-			          </c:forEach>
+			          <div class="custom-card">
+			            <!-- 이미지 -->
+			            <a href="/shop/artistGroup/${artistGroupVO.artGroupNo}/detail/${goodsVO.gdsNo}">
+			              <img class="card-img-top img-fluid" src="/upload/${goodsVO.fileGroupVO.fileDetailVOList[0].fileSaveLocate}" 
+			               onerror=this.src='/images/noImage.png' alt="굿즈 이미지">
+			            </a>
+			          </div>
 			        </div>
+			        
+			        <div class="custom-card-text">
+				      <h5 class="card-title multiline-ellipsis-line1">${goodsVO.gdsNm}</h5><br>
+				      <p class="card-price text-left">
+				        ₩ <fmt:formatNumber value="${goodsVO.unitPrice}" pattern="#,###" />
+				      </p>
+				    </div>
 			      </div>
-			    </div>
-			    </c:forEach>
-	          </div>
+			    </template>
 			  
-	          <!-- 공연/예매/티켓 탭 -->
-	          <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
-	           <%@ include file="ticketList.jsp" %>
-	          </div>
+	        <!-- 공연/예매/티켓 탭 -->
+	        <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+	          <%@ include file="ticketList.jsp" %>
 	        </div>
-	        
-	        <!-- Weverse by Fans 영역 -->
-	        <div class="card">
-			  <div class="card-header pretty-sky">
-			    <!-- 그룹 헤더 -->
-			    <div class="d-flex flex-column">
-				  <h4 class="text-left" style="color: white;">Weverse</h4>
-				  <h5 class="text-left" style="color: white;">by Fans</h5>
-				  <h6 class="text-left" style="color: white;">Make your own offcial merch!</h6>
-				</div>
-			  </div>
-			  
-			  <!-- card Body -->    
-			  <div class="card-body">
-			    <!-- button 영역 -->
-	          	<c:forEach var="artistGroupVO" items="${topArtistGoodsList}">
-	          	  <button class="card-artistNm ${artistGroupVO.rnum == 1 ? 'active' : ''}" value="${artistGroupVO.artGroupNo}">${artistGroupVO.artGroupNm}</button>
-	          	</c:forEach>
-				
-				<div class="d-flex flex-wrap gap-3 pt-3" id="topArtistList">
-				  <!-- topArtist가 비어있을 때 처리 -->
-				  <c:choose>
-				    <c:when test="${empty topArtistGoodsList}">
-				      <!-- 텍스트 -->
-					  <div class="custom-card-text">
-					    <h5 class="card-title">해당 상품이 존재 하지 않습니다.</h5><br>
-					  </div>
-				    </c:when>
-				    
-				    <c:otherwise>
-				      <c:forEach var="artistGroupVO" items="${topArtistGoodsList}">
-				        <c:forEach var="goodsVO" items="${artistGroupVO.goodsVOList}">
-				          <div class="custom-card">
-				            <!-- 이미지 -->
-				            <a href="/shop/artistGroup/${artistGroupVO.artGroupNo}/detail/${goodsVO.gdsNo}">
-				              <img class="card-img-top img-fluid" 
-				                src="/upload/${goodsVO.fileGroupVO.fileDetailVOList[0].fileSaveLocate}" onerror=this.src="/images/noImage.png" alt="굿즈 이미지">
-				            </a>
-				            <!-- 텍스트 -->
-					        <div class="custom-card-text">
-					          <h5 class="card-title multiline-ellipsis-line1">${goodsVO.gdsNm}</h5><br>
-						      <p class="card-price text-left">
-						        ₩ <fmt:formatNumber value="${goodsVO.unitPrice}" pattern="#,###" />
-						      </p>
-					        </div>
-				          </div>
-				        </c:forEach>
-				      </c:forEach>
-				    </c:otherwise>
-				  </c:choose>
-			    </div>
+	      </div>
+	      
+	      <!-- Weverse by Fans 영역 -->
+	      <div class="card" id="weverse">
+	      	<!-- template 영역 -->
+		  </div>
+			
+		  <template id="card-weverse-template">
+	        <div class="card-header pretty-sky">
+			  <!-- 그룹 헤더 -->
+			  <div class="d-flex flex-column">
+				<h4 class="text-left card-weverse-header">Weverse</h4>
+				<h5 class="text-left card-weverse-header">by Fans</h5>
+				<h6 class="text-left card-weverse-header">Make your own offcial merch!</h6>
 			  </div>
 			</div>
+	      </template>
+			  
+		  <template id="card-weverse-body-template">
+			<div class="card-body">
+			  <div class="d-flex flex-wrap gap-3 pt-3">
+			    <div class="custom-card">
+			      <!-- 이미지 -->
+			      <a href="/shop/artistGroup/${artistGroupVO.artGroupNo}/detail/">
+			        <img class="card-img-top img-fluid" src="/upload/" 
+			         onerror=this.src='/images/noImage.png' alt="굿즈 이미지">
+			      </a>
+			    </div>
+			  </div>
+			        
+			  <div class="custom-card-text">
+			    <h5 class="card-title multiline-ellipsis-line1"></h5><br>
+				<p class="card-price text-left">
+				 ₩ <fmt:formatNumber value="" pattern="#,###" />
+				</p>
+		      </div>
+			</div>
+	      </template>
+			
 	      </div> <!-- 카드 바디 끝 -->
 	    </div> <!-- 카드 끝 -->
 	  </div>
 	</div>
 	<p><p><p>
-		<%@ include file="../shopfooter.jsp" %>
+  	
+	<%@ include file="../shopfooter.jsp" %>
 		
 	<!-- Scroll Top -->
 	<a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center active">
@@ -240,162 +221,6 @@
 document.addEventListener("DOMContentLoaded", () => {
     startApp();
 });
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-$('#prev').on('click', function(){
-	let currentPage = $(this).val();
-	--currentPage;
-	artistPageList(currentPage);
-})
-
-
-$('#next').on('click', function(){
-	let totalPage = $("#totalPage").val();
-	let currentPage = $(this).val();
-	
-	if(currentPage != totalPage){
-		++currentPage;
-		artistPageList(currentPage);
-	}
-})
-
-*/
-
-function artistPageList(currentPage){
-	const datas = {
-		"currentPage" : currentPage,
-		"blockSize" : 9
-	}
-	
-
-	fetch('/shop/communityProfileListPage', {
-		method: "post",
-		headers: {
-			"Content-Type": "application/json;charset=UTF-8",
-		},
-		 body: JSON.stringify(datas)
-	}).then( resp => {
-		resp.json().then( (rslt) => {
-			console.log(rslt);
-			
-			let str = "";
-			rslt.map( (item, idx) => {
-				str += 
-					`<div class="card artist-card">
-					   <a href="/shop/artistGroup?artGroupNo=\${item.artGroupNo}">
-					     <img src="/upload\${item.artistGroupVO.fileGroupVO.fileDetailVOList[0].fileSaveLocate}"
-					    	 class="img-fluid artist-avatar" style="width: 100px; height: 100px; object-fit: cover;" 
-					    	   alt="\${item.artistGroupVO.fileGroupVO.fileDetailVOList[0].fileOriginalName}"/>
-					   </a>
-	            	   <div class="card-body text-center p-1">
-	              	     <h5 class="card-title card-title-home multiline-ellipsis-line1 mt-3">\${item.artistGroupVO.artGroupNm}</h5>
-	            	   </div>
-	          	     </div>
-	          	    `
-		  })
-		  
-		  let totalPage = $("#totalPage").val();
-		  $("#artistTitle").empty();
-		  $("#artistTitle").append(str);
-		  $("#prev").val(currentPage);
-		  $("#next").val(currentPage);
-		  $("#currentPage").text(currentPage + "/" + totalPage);
-		  
-		  if(currentPage == 1) {
-			$('#prev').addClass('disabled');
-		  }else{
-			$('#prev').removeClass('disabled');  
-		  }
-		  
-		  
-		  if(currentPage == totalPage){
-			$('#next').addClass('disabled');
-		  }else{
-			$('#next').removeClass('disabled');  
-		  }
-	   })
-	})
-}
-
-$('.card-artistNm').on('click', function(){
-	
-	//기존 선택된 버튼의 active를 제거하고 선택된 버튼에 active 클래스 적용
-	$('.card-artistNm.active').removeClass('active');
-	$(this).addClass('active');
-	
-	let artGroupNo = $(this).val();
-	
-	console.log(artGroupNo);
-	
-	artistGroupVO = {
-	  "artGroupNo" : artGroupNo
-	}
-	
-	//topArtistAjax를 통해 선택된 그룹명의 상품리스트를 받고 화면에 출력 함.
-	fetch('/shop/artistGroup/topArtistAjax', {
-		method: "post",
-		headers: {
-			"Content-Type": "application/json;charset=UTF-8",
-		},
-		body: JSON.stringify(artistGroupVO)
-	}).then( (resp) => {
-		resp.json().then( (rslt) => {
-			
-			let topArtistList = document.getElementById("topArtistList");
-			console.log("rslt[0] : " + rslt);
-			
-			if(rslt != ''){
-				let goodsVOList = rslt[0].goodsVOList;
-				
-				let cardList = goodsVOList.map( (item, idx) => {
-					console.log("item : " , item);
-					
-					return `<div class="custom-card">
-					 		  <a href="/shop/artistGroup/\${rslt[0].artGroupNo}/detail/\${item.gdsNo}">
-							    <img class="card-img-top img-fluid" 
-			          		     src="/upload/\${item.fileGroupVO.fileDetailVOList[0].fileSaveLocate}" onerror=this.src='/images/noImage.png' alt="굿즈 이미지">
-			          		  </a>
-							  <div class="custom-card-text">
-							    <h5 class="card-title multiline-ellipsis-line1">\${item.gdsNm}</h5><br>
-							    <p class="card-price text-left">
-							      ₩ \${item.unitPrice.toLocaleString()}
-							  </p>
-							  </div>
-							</div>
-					      `
-				})
-				
-				let str= "";
-				cardList.forEach( ( card ) => {
-					str += card;
-				})
-				
-				console.log("str : " + str);
-				topArtistList.innerHTML = str;
-			}
-			else{
-				let str= "";
-				str += `<div class="custom-card-text">
-				    	  <h5 class="card-title">해당 상품이 존재 하지 않습니다.</h5><br>
-				  		</div>`
-				  		
-				console.log("str : " + str);
-				topArtistList.innerHTML = str;
-			}
-		})
-	})
-})
 
 </script>
 </html>

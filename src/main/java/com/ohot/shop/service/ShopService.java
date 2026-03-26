@@ -18,18 +18,12 @@ public interface ShopService {
 	public List<CommunityProfileVO> communityProfileList(UsersVO usersVO);
 
 	public List<ArtistGroupVO> artistGroupGoodsList(List<CommunityProfileVO> communityProfileVOList);
-	
-	public List<ArtistGroupVO> getTopArtistGoodsList(SysConfigInfoVO configKeyVO);
 
+	public List<ArtistGroupVO> getTopArtistNameList(SysConfigInfoVO configKeyVO);
+	
+	public List<GoodsVO> getTopArtistGoods(ArtistGroupVO artistGroupVO);
+	
 	public int getMyArtistTotal(UsersVO usersVO);
-	
-	
-	
-	
-	
-	
-	
-	
 	
 	
 	
@@ -70,6 +64,8 @@ public interface ShopService {
 	public String getMemberShipCheck(CommunityProfileVO communityProfileVO);
 
 	public CommunityProfileVO findComProfileNoCheck(MemberShopVO memberShopVO);
+
+	
 
 	
 	

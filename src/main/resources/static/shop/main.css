@@ -266,6 +266,14 @@ footer {
 	/* 둥근 모서리 변경 시 .collapsed-accordion-btn 값도 변경할 것. */
 }
 
+.card-header {
+	background-color: #dee2e6 !important;
+}
+
+.card-weverse-header {
+	color: white;
+}
+
 .card-body-container {
 	padding: 0 0 0 0 !important;
 }

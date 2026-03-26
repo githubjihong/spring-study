@@ -39,8 +39,18 @@ public class ShopImpl implements ShopService{
 	}
 	
 	@Override
-	public List<ArtistGroupVO> getTopArtistGoodsList(SysConfigInfoVO configKeyVO) {
-		return shopMapper.getTopArtistGoodsList(configKeyVO);
+	public List<ArtistGroupVO> artistGroupGoodsList(List<CommunityProfileVO> communityProfileVOList) {
+		return shopMapper.artistGroupGoodsList(communityProfileVOList);
+	}
+	
+	@Override
+	public List<ArtistGroupVO> getTopArtistNameList(SysConfigInfoVO configKeyVO) {
+		return shopMapper.getTopArtistNameList(configKeyVO);
+	}
+	
+	@Override
+	public List<GoodsVO> getTopArtistGoods(ArtistGroupVO artistGroupVO) {
+		return shopMapper.getTopArtistGoods(artistGroupVO);
 	}
 	
 	@Override
@@ -56,13 +66,6 @@ public class ShopImpl implements ShopService{
 	
 	
 	
-	
-	
-	
-	@Override
-	public List<ArtistGroupVO> artistGroupGoodsList(List<CommunityProfileVO> communityProfileVOList) {
-		return shopMapper.artistGroupGoodsList(communityProfileVOList);
-	}
 	
 	@Override
 	public List<CommunityProfileVO> communityProfileBaseList() {

@@ -248,74 +248,75 @@
 	<!-- 굿즈 판매량이 많은 아티스트 그룹을 반환 
 		 판매량이 같을 경우 정렬된 순서를 기준으로 반환
 	-->
-	<select id="getTopArtistGoodsList" parameterType="com.ohot.vo.SysConfigInfoVO" resultMap="artstGroupMapInfo">
-	  /* com.ohot.shop.mapper.ShopMapper.getTopArtistGoodsList */
+	<select id="getTopArtistNameList" parameterType="com.ohot.vo.SysConfigInfoVO" resultMap="artistGroupMap">
+	  /* com.ohot.shop.mapper.ShopMapper.getTopArtistNameList */
 	  
-	  WITH SUBS_TOP AS (
-        SELECT ART_GROUP_NO 
-  		  FROM (SELECT B.ART_GROUP_NO AS ART_GROUP_NO , SUM(A.AMOUNT) AS AMOUNT_SUM
+	  SELECT ART_GROUP_NO 
+	       , ART_GROUP_NM
+  		  FROM (SELECT B.ART_GROUP_NO AS ART_GROUP_NO
+                     , C.ART_GROUP_NM
+                     , SUM(A.AMOUNT) AS AMOUNT_SUM
   				  FROM ORDERS_DETAILS A INNER JOIN GOODS B ON (A.GDS_NO = B.GDS_NO)
-				 GROUP BY B.ART_GROUP_NO HAVING B.ART_GROUP_NO != 0	
-				 ORDER BY 2 DESC)
+                                        INNER JOIN ARTIST_GROUP C ON (B.ART_GROUP_NO = C.ART_GROUP_NO)
+				 GROUP BY B.ART_GROUP_NO, C.ART_GROUP_NM HAVING B.ART_GROUP_NO != 0	
+				 ORDER BY AMOUNT_SUM DESC)
 	    WHERE ROWNUM BETWEEN 1 AND #{configVal}
-	  ),
-      
-      LATEST_FILE_DETAIL AS (
-		        	SELECT FILE_SN
-		         	   	 , FILE_GROUP_NO
-		         	   	 , FILE_ORIGINAL_NAME
-					     , FILE_SAVE_NAME
-					     , FILE_SAVE_LOCATE
-					     , FILE_SIZE
-					     , FILE_EXT
-					     , FILE_MIME
-					     , FILE_FANCYSIZE
-					     , FILE_SAVE_DATE
-					     , FILE_DOWNCOUNT
-		          	  FROM ( SELECT FILE_SN
-		         	   			  , FILE_GROUP_NO
-		         	   			  , FILE_ORIGINAL_NAME
-					         	  , FILE_SAVE_NAME
-					              , FILE_SAVE_LOCATE
-					              , FILE_SIZE
-					              , FILE_EXT
-					              , FILE_MIME
-					              , FILE_FANCYSIZE
-					              , FILE_SAVE_DATE
-					              , FILE_DOWNCOUNT
-		               			  , ROW_NUMBER() OVER (PARTITION BY file_group_no ORDER BY file_sn DESC) AS RN
-		           			   FROM file_detail
-		           	  )
-		          WHERE RN = 1 
-		 )
-      
-	  SELECT A.ART_GROUP_NO
-           , A.ART_GROUP_NM
-           , C.GDS_NO
-           , C.GDS_NM
-           , C.UNIT_PRICE
-           , C.FILE_GROUP_NO
-		   , E.FILE_SN
-           , E.FILE_GROUP_NO
-           , E.FILE_ORIGINAL_NAME
-		   , E.FILE_SAVE_NAME
-		   , E.FILE_SAVE_LOCATE
-		   , E.FILE_SIZE
-		   , E.FILE_EXT
-		   , E.FILE_MIME
-		   , E.FILE_FANCYSIZE
-		   , E.FILE_SAVE_DATE
-		   , E.FILE_DOWNCOUNT
-           , ROWNUM AS RNUM
-      	FROM ARTIST_GROUP A INNER JOIN SUBS_TOP  B ON(A.ART_GROUP_NO = B.ART_GROUP_NO)
-            				INNER JOIN GOODS C ON(A.ART_GROUP_NO = C.ART_GROUP_NO)
-            				LEFT JOIN FILE_GROUP D ON (C.FILE_GROUP_NO = D.FILE_GROUP_NO)
-            				LEFT JOIN LATEST_FILE_DETAIL E ON (D.FILE_GROUP_NO = E.FILE_GROUP_NO)
-       WHERE C.GDS_DEL_YN = 'N'
-         AND (C.COMM_CODE_GRP_NO IS NULL OR C.COMM_CODE_GRP_NO='GD01')
-       ORDER BY A.ART_GROUP_NM ASC, E.FILE_SN DESC
 	</select>
 	
+	<select id="getTopArtistGoods" parameterType="com.ohot.vo.ArtistGroupVO" resultMap="goodsMap">
+	  /* com.ohot.shop.mapper.ShopMapper.getTopArtistGoods */
+	  
+	  WITH LATEST_FILE_DETAIL AS (
+		     SELECT FILE_SN
+		          , FILE_GROUP_NO
+		          , FILE_ORIGINAL_NAME
+				  , FILE_SAVE_NAME
+				  , FILE_SAVE_LOCATE
+				  , FILE_SIZE
+				  , FILE_EXT
+				  , FILE_MIME
+				  , FILE_FANCYSIZE
+				  , FILE_SAVE_DATE
+				  , FILE_DOWNCOUNT	   	 
+		       FROM ( SELECT FILE_SN
+		         	   	   , FILE_GROUP_NO
+		         	   	   , FILE_ORIGINAL_NAME
+					       , FILE_SAVE_NAME
+					       , FILE_SAVE_LOCATE
+					       , FILE_SIZE
+					       , FILE_EXT
+					       , FILE_MIME
+					       , FILE_FANCYSIZE
+					       , FILE_SAVE_DATE
+					       , FILE_DOWNCOUNT
+		               	   , ROW_NUMBER() OVER (PARTITION BY file_group_no ORDER BY file_sn DESC) AS RN
+		           		FROM file_detail)
+		          	   WHERE RN = 1 
+	  )
+	  SELECT A.ART_GROUP_NO
+           , A.GDS_NO
+           , A.GDS_NM
+           , A.UNIT_PRICE
+           , B.FILE_GROUP_NO
+		   , C.FILE_SN
+           , C.FILE_GROUP_NO
+           , C.FILE_ORIGINAL_NAME
+		   , C.FILE_SAVE_NAME
+		   , C.FILE_SAVE_LOCATE
+		   , C.FILE_SIZE
+		   , C.FILE_EXT
+		   , C.FILE_MIME
+		   , C.FILE_FANCYSIZE
+		   , C.FILE_SAVE_DATE
+		   , C.FILE_DOWNCOUNT
+           , ROWNUM AS RNUM
+      	FROM GOODS A LEFT JOIN FILE_GROUP B ON (A.FILE_GROUP_NO = B.FILE_GROUP_NO)
+                     LEFT JOIN LATEST_FILE_DETAIL C ON (B.FILE_GROUP_NO = C.FILE_GROUP_NO)
+       WHERE A.GDS_DEL_YN = 'N'
+         AND (A.COMM_CODE_GRP_NO IS NULL OR A.COMM_CODE_GRP_NO='GD01')
+         AND A.ART_GROUP_NO = #{artGroupNo}
+       ORDER BY A.GDS_NM DESC
+	</select>
 	
 	<!-- 나의 아티스트 목록 총 합계 반환 -->
 	<select id="getMyArtistTotal" parameterType="com.ohot.vo.UsersVO" resultType="int">
@@ -332,10 +333,6 @@
              	</when>
           </choose>
 	</select>
-	
-	
-	
-	
 	
 	
 	
@@ -512,75 +509,6 @@
 		<result property="fileSaveDate" column="GOODS_FILE_SAVE_DATE"/>
 		<result property="fileDowncount" column="GOODS_FILE_DOWNCOUNT"/>
 	</resultMap>
-	
-	<!-- 아티스트 별 상품 목록 출력 -->
-	<select id="topArtistGoodsList" parameterType="com.ohot.vo.ArtistGroupVO" resultMap="artstGroupMapInfo">
-	    /* com.ohot.shop.mapper.ShopMapper.topArtistGoodsList */
-		
-		WITH TBL AS (
-		SELECT *
-  		  FROM (SELECT a.art_group_no
-			 , a.art_group_debut_ymd
-			 , a.art_group_nm
-			 , a.art_group_expln
-			 , a.art_group_reg_ymd
-			 , a.art_group_del_yn
-             , a.file_group_no
-		     , b.gds_no
-		     , b.gds_type
-		     , b.gds_nm
-		     , b.unit_price
-		     , b.expln
-		     , b.pic
-		     , b.reg_dt
-             , b.file_group_no as file_group_no_gds
-		     , b.comm_code_grp_no
-		     , b.art_no
-		     , b.qty
-		     , b.gds_del_yn
-             , ROW_NUMBER() OVER (PARTITION BY A.file_group_no ORDER BY GDS_NO DESC) AS RN
-      	  FROM ARTIST_GROUP A INNER JOIN GOODS B ON(A.art_group_no = B.ART_GROUP_NO AND ART_GROUP_DEL_YN  = 'N')
-      	 WHERE (B.COMM_CODE_GRP_NO IS NULL OR B.COMM_CODE_GRP_NO='GD01') 
-           AND B.GDS_DEL_YN = 'N'
-      	 )  
-      	 WHERE RN BETWEEN 1 AND 10
-      )
-		
-		SELECT a.art_group_no
-			 , a.art_group_debut_ymd
-			 , a.art_group_nm
-			 , a.art_group_expln
-			 , a.art_group_reg_ymd
-			 , a.art_group_del_yn
-		     , a.gds_no
-		     , a.gds_type
-		     , a.gds_nm
-		     , a.unit_price
-		     , a.expln
-		     , a.pic
-		     , a.reg_dt
-             , a.file_group_no
-		     , a.comm_code_grp_no
-		     , art_no
-		     , qty
-		     , gds_del_yn
-             , b.file_regdate
-		     , c.file_sn
-		     , c.file_original_name
-		     , c.file_save_name
-		     , c.file_save_locate
-		     , c.file_size
-		     , c.file_ext
-		     , c.file_mime
-		     , c.file_fancysize
-		     , c.file_save_date
-		     , c.file_downcount
-  		  FROM TBL A LEFT OUTER JOIN FILE_GROUP B ON (A.file_group_no_gds = B.FILE_GROUP_NO)
-             		 LEFT OUTER JOIN FILE_DETAIL C ON (B.FILE_GROUP_NO = C.FILE_GROUP_NO)
-		  WHERE a.art_group_no = #{artGroupNo}
-		  ORDER BY c.file_sn DESC
-		
-	</select>
 	
 	<!-- OrdersVO -->
 	<resultMap type="com.ohot.shop.vo.OrdersVO" id="ordersInfo">
@@ -990,6 +918,75 @@
 	
 	
 	<!-- 미사용 코드(정리되서 없어지는 코드) -->
+	<!-- 아티스트 별 상품 목록 출력 -->
+	<select id="topArtistGoodsList" parameterType="com.ohot.vo.ArtistGroupVO" resultMap="artstGroupMapInfo">
+	    /* com.ohot.shop.mapper.ShopMapper.topArtistGoodsList */
+		
+		WITH TBL AS (
+		SELECT *
+  		  FROM (SELECT a.art_group_no
+			 , a.art_group_debut_ymd
+			 , a.art_group_nm
+			 , a.art_group_expln
+			 , a.art_group_reg_ymd
+			 , a.art_group_del_yn
+             , a.file_group_no
+		     , b.gds_no
+		     , b.gds_type
+		     , b.gds_nm
+		     , b.unit_price
+		     , b.expln
+		     , b.pic
+		     , b.reg_dt
+             , b.file_group_no as file_group_no_gds
+		     , b.comm_code_grp_no
+		     , b.art_no
+		     , b.qty
+		     , b.gds_del_yn
+             , ROW_NUMBER() OVER (PARTITION BY A.file_group_no ORDER BY GDS_NO DESC) AS RN
+      	  FROM ARTIST_GROUP A INNER JOIN GOODS B ON(A.art_group_no = B.ART_GROUP_NO AND ART_GROUP_DEL_YN  = 'N')
+      	 WHERE (B.COMM_CODE_GRP_NO IS NULL OR B.COMM_CODE_GRP_NO='GD01') 
+           AND B.GDS_DEL_YN = 'N'
+      	 )  
+      	 WHERE RN BETWEEN 1 AND 10
+      )
+		
+		SELECT a.art_group_no
+			 , a.art_group_debut_ymd
+			 , a.art_group_nm
+			 , a.art_group_expln
+			 , a.art_group_reg_ymd
+			 , a.art_group_del_yn
+		     , a.gds_no
+		     , a.gds_type
+		     , a.gds_nm
+		     , a.unit_price
+		     , a.expln
+		     , a.pic
+		     , a.reg_dt
+             , a.file_group_no
+		     , a.comm_code_grp_no
+		     , art_no
+		     , qty
+		     , gds_del_yn
+             , b.file_regdate
+		     , c.file_sn
+		     , c.file_original_name
+		     , c.file_save_name
+		     , c.file_save_locate
+		     , c.file_size
+		     , c.file_ext
+		     , c.file_mime
+		     , c.file_fancysize
+		     , c.file_save_date
+		     , c.file_downcount
+  		  FROM TBL A LEFT OUTER JOIN FILE_GROUP B ON (A.file_group_no_gds = B.FILE_GROUP_NO)
+             		 LEFT OUTER JOIN FILE_DETAIL C ON (B.FILE_GROUP_NO = C.FILE_GROUP_NO)
+		  WHERE a.art_group_no = #{artGroupNo}
+		  ORDER BY c.file_sn DESC
+		
+	</select>
+	
 	<!-- 비회원이거나 가입한 아티스트 그룹이 없을 때 조회 -->
 	<select id="communityProfileBaseList" resultMap="communityProfileMapInfo">
 	  /* com.ohot.shop.mapper.ShopMapper.communityProfileList */

@@ -137,59 +137,9 @@ public class ShopController {
 							, HttpServletRequest request) {
 		
 		
-		
-		/*
-		//BannerList
-		String requestURI = request.getRequestURI();
-		CommonTaskMemtVO commonTaskMemt = this.commonTaskMgmtMapper.getCommonTaskMemt(requestURI);
-		List<BannerFileVO> bannerFileVOList = bannerFileService.bannerFileList(commonTaskMemt.getTaskSeNm());
-		
-		//Recommended Artist List
-		UsersVO usersVO = null;
-		SysConfigInfoVO configKeyVO = null;
-		
-		if(customUser != null) {
-			usersVO = customUser.getUsersVO();
-			configKeyVO = this.sysConfigInfoMapper.getConfigKey("LOGIN_USER_ARTIST_VAL");
-		}else {
-			usersVO = new UsersVO();
-			configKeyVO = this.sysConfigInfoMapper.getConfigKey("NO_LOGIN_USER_ARTIST_VAL");
-		}
-		
-		usersVO.setSysConfigInfoVO(configKeyVO);
-		List<CommunityProfileVO> communityProfileVOList = shopService.communityProfileList(usersVO);
-		
-		//Artist TotalPage
-		Map<String, Object> pageInit = null;
-		configKeyVO = this.sysConfigInfoMapper.getConfigKey("MYARTIST_MAX_VAL");
-		if(customUser != null) {
-			pageInit = PageInit(configKeyVO, shopService.getMyArtistTotal(usersVO));
-		}else {
-			pageInit = PageInit(configKeyVO, 0);
-		}
-		
-		
-		
-		//굿즈 리스트 목록 가져오기
-		List<ArtistGroupVO> artistGroupGoodsList = shopService.artistGroupGoodsList(communityProfileVOList);
-		
 		//티켓 리스트 목록 가져오기
 		List<GoodsVO> goodsVOList = this.ticketService.ticketList(tkCtgr);
-		
-		//굿즈 판매량 누적 순위 가져오기
-		configKeyVO = this.sysConfigInfoMapper.getConfigKey("TOP_GOODS_VAL");
-		List<ArtistGroupVO> topArtistGoodsList = shopService.getTopArtistGoodsList(configKeyVO);
-		
-		//model
-		model.addAttribute("bannerFileVOList", bannerFileVOList);
-		model.addAttribute("communityProfileVOList", communityProfileVOList);
 		model.addAttribute("goodsVOList", goodsVOList);
-		model.addAttribute("artistGroupGoodsList", artistGroupGoodsList);
-		model.addAttribute("topArtistGoodsList", topArtistGoodsList);
-		
-		model.addAttribute("currentPage", pageInit.get("currentPage"));
-		model.addAttribute("totalPage", pageInit.get("totalPage"));
-		*/
 		
 		return "shop/home";
 	}
@@ -235,9 +185,21 @@ public class ShopController {
 		
 		List<CommunityProfileVO> communityProfileVOList = shopService.communityProfileList(usersVO);
 		
+		//굿즈 리스트 목록 가져오기
+		List<ArtistGroupVO> artistGroupGoodsList = shopService.artistGroupGoodsList(communityProfileVOList);
+		
+		//굿즈 판매량 누적 순위 가져오기
+		configKeyVO = this.sysConfigInfoMapper.getConfigKey("TOP_GOODS_VAL");
+		List<ArtistGroupVO> topArtistNameList = shopService.getTopArtistNameList(configKeyVO);
+		
+		List<GoodsVO> topArtistGoodsList = shopService.getTopArtistGoods(topArtistNameList.get(0));
+		
 		map.put("bannerFileVOList", bannerFileVOList);
 		map.put("communityProfileVOList", communityProfileVOList);
 		map.put("pageUtil", pageUtil);
+		map.put("artistGroupGoodsList", artistGroupGoodsList);
+		map.put("topArtistNameList", topArtistNameList);
+		map.put("topArtistGoodsList", topArtistGoodsList);
 		
 		return map;
 	}
@@ -264,69 +226,27 @@ public class ShopController {
 		usersVO.setPageUtil(pageUtil);
 		
 		List<CommunityProfileVO> communityProfileVOList = shopService.communityProfileList(usersVO);
+		
+		//굿즈 리스트 목록 가져오기
+		List<ArtistGroupVO> artistGroupGoodsList = shopService.artistGroupGoodsList(communityProfileVOList);
+
 		map.put("communityProfileVOList", communityProfileVOList);
+		map.put("artistGroupGoodsList", artistGroupGoodsList);
 		
 		return map;
 	}
 	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+	@ResponseBody
+	@PostMapping("/getTopArtistGoodsAjax")
+	public Map<String,Object> getTopArtistGoods(@RequestBody ArtistGroupVO artistGroupVO){
+		
+		Map<String,Object> map = new HashMap<String,Object>();
+		List<GoodsVO> topArtistGoodsList = shopService.getTopArtistGoods(artistGroupVO);
+		
+		map.put("topArtistGoodsList", topArtistGoodsList);
+		
+		return map;
+	}
 	
 	
 	

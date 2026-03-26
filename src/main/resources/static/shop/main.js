@@ -1,5 +1,4 @@
 
-
 (function(){
 	document.addEventListener("DOMContentLoaded", function(){
 		console.log("Spring JS Loaded!");
@@ -10,19 +9,26 @@ async function startApp() {
     let result = await getFetchAjax('/shop/homeAjax');
     bannerInit(result.bannerFileVOList);
 	myArtistInit(result.communityProfileVOList);
-	
-	console.log(result);
+	artistGrouptInit(result.artistGroupGoodsList);
+	weverseByFansInit(result.topArtistNameList , result.topArtistGoodsList);
 	
 	pageInit(result.pageUtil);
 	
 	//Button eventListener
-	let pageBtn = document.querySelectorAll("#prev,#next");
+	let $pageBtn = document.querySelectorAll("#prev,#next");
 	
-	pageBtn.forEach( function( btn, index){
+	$pageBtn.forEach( function( btn, index){
 		btn.addEventListener("click", function(e) {
 			moveToPage(e.currentTarget);
 		});
 	})
+	
+	let $weversBtn = document.querySelectorAll(".card-artistNm");
+	$weversBtn.forEach( function (btn, index) {
+		btn.addEventListener("click", function(e) {
+			weversClickPage(e.currentTarget);
+		});
+	});
 }
 
 function bannerInit(bannerFileVOList) {
@@ -175,6 +181,158 @@ async function moveToPage(e){
 	//Server로 전송하여 데이터 가져오기
 	let result = await postFetchAjax("/shop/getCommunityProfileListAjax", data);
 	myArtistInit(result.communityProfileVOList);
+	artistGrouptInit(result.artistGroupGoodsList);
+}
+
+function artistGrouptInit(artistGroupGoodsList){
+	let $goodsBox = document.getElementById("goods");
+	
+	let headerTemp = document.getElementById("card-header-template");
+	let bodyTemp = document.getElementById("card-body-template");
+	
+	$goodsBox.innerHTML = "";
+	
+	//cardHeader 만들기
+	artistGroupGoodsList.forEach( function (artistGroupVO, index){
+		
+		//card생성
+		let $cardContainer = document.createElement("div");
+		$cardContainer.className = "card mb-5";
+		
+		let headerClone = headerTemp.content.cloneNode(true);
+		let $cardHeader = headerClone.querySelector(".card-header");
+		
+		$cardHeader.innerHTML = `
+		  <div class="card-header">
+		    <div class="d-flex flex-column">
+			  <a href="/shop/artistGroup?artGroupNo=${artistGroupVO.artGroupNo}">
+			    <span class="header-badge mb-2">Now</span>
+				<h3 class="artist-groupName text-left">${artistGroupVO.artGroupNm}</h3>
+			  </a>
+			</div>
+		  </div>`;
+		
+		let $cardBody = document.createElement("div");
+		$cardBody.className = "card-body";
+		
+		let $listContainer = document.createElement("div");
+		$listContainer.className = "d-flex flex-wrap gap-3 pt-3";
+		
+		artistGroupVO.goodsVOList.forEach( function (goodsVO, index){
+			let bodyClone = bodyTemp.content.cloneNode(true);
+			let $goodsItem = bodyClone.querySelector(".custom-card");
+					
+			$goodsItem.innerHTML = `
+			  <a href="/shop/artistGroup/${artistGroupVO.artGroupNo}/detail/${goodsVO.gdsNo}">
+			    <img class="card-img-top img-fluid" src="/upload/${goodsVO.fileGroupVO.fileDetailVOList[0].fileSaveLocate}" 
+				 onerror=this.src='/images/noImage.png' alt="굿즈 이미지">
+			  </a>
+												   
+			  <div class="custom-card-text">
+			    <h5 class="card-title multiline-ellipsis-line1">${goodsVO.gdsNm}</h5><br>
+				<p class="card-price text-left">₩ ${goodsVO.unitPrice.toLocaleString()}</p>
+			  </div>`;
+			$listContainer.appendChild($goodsItem);
+		})
+		
+		$cardContainer.appendChild($cardHeader);
+		$cardBody.appendChild($listContainer);
+		$cardContainer.appendChild($cardBody);
+		$goodsBox.appendChild($cardContainer);
+	});
+}
+
+function weverseByFansInit(topArtistNameList, topArtistGoodsList){
+	
+	let $weversBox = document.getElementById("weverse");
+	let weversTemp = document.getElementById("card-weverse-template");
+	let weversBodyTemp = document.getElementById("card-weverse-body-template");
+	
+	//$weversBox.innerHTML = '';
+	let weversClone = weversTemp.content.cloneNode(true);
+	
+	let $artistTabBox = document.createElement("div");
+	$artistTabBox.className = "card-body artist-tabs"; // 버튼 전용 클래스
+	
+	if(topArtistNameList){
+		let $weversHeader = weversClone.querySelector(".card-header,.pretty-sky").querySelector("div");
+		let datas = ["Weverse", "by Fans", "Make your own offcial merch!"];
+		[...$weversHeader.children].forEach( function (item, index){
+			item.innerText = datas[index];
+		});
+		
+		$weversBox.appendChild(weversClone);
+		
+		topArtistNameList.forEach(function (artistGroupVO, index) {
+					
+			let $btn = document.createElement("button");
+			$btn.className = "card-artistNm";
+			$btn.value = `${artistGroupVO.artGroupNo}`;
+			$btn.innerText = `${artistGroupVO.artGroupNm}`;
+					
+			if(index == 0) {
+				$btn.classList.add("active");
+			}
+			$artistTabBox.appendChild($btn);
+		})
+		
+		$weversBox.appendChild($artistTabBox);
+	}
+	
+	let cardList = $weversBox.querySelectorAll(".card-body");
+	if(cardList){
+		cardList.forEach( function($card , index) {
+			if(!$card.classList.contains("artist-tabs")){
+				$card.remove();
+			}
+		})
+	}
+	
+	let $cardBody = document.createElement("div");
+	$cardBody.className = "card-body";
+				
+	let $listContainer = document.createElement("div");
+	$listContainer.className = "d-flex flex-wrap gap-3 pt-3";
+	
+	topArtistGoodsList.forEach( function (goodsVO, index){	
+		let bodyClone = weversBodyTemp.content.cloneNode(true);
+		let $goodsItem = bodyClone.querySelector(".custom-card");
+		
+		$goodsItem.innerHTML = `
+			<a href="/shop/artistGroup/${goodsVO.artGroupNo}/detail/${goodsVO.gdsNo}">
+			  <img class="card-img-top img-fluid" src="/upload/${goodsVO.fileGroupVO.fileDetailVOList[0].fileSaveLocate}" 
+			   onerror=this.src='/images/noImage.png' alt="굿즈 이미지">
+			  </a>
+																   
+			  <div class="custom-card-text">
+			    <h5 class="card-title multiline-ellipsis-line1">${goodsVO.gdsNm}</h5><br>
+				<p class="card-price text-left">₩ ${goodsVO.unitPrice.toLocaleString()}</p>
+			  </div>`;
+			$listContainer.appendChild($goodsItem);
+			$cardBody.appendChild($listContainer);
+		})
+	$weversBox.appendChild($cardBody);
+}
+
+async function weversClickPage(e){
+	
+	let $weversBtn = document.querySelectorAll(".card-artistNm");
+	
+	$weversBtn.forEach( function (btn, index) {
+		btn.classList.remove("active");
+	});
+	
+	e.classList.add("active");
+	
+	console.log(e.value);
+	
+	artistGroupVO = {
+		"artGroupNo" : e.value,
+	}
+		
+	//Server로 전송하여 데이터 가져오기
+	let result = await postFetchAjax("/shop/getTopArtistGoodsAjax", artistGroupVO);
+	weverseByFansInit("", result.topArtistGoodsList);
 }
 
 async function getFetchAjax(url) {

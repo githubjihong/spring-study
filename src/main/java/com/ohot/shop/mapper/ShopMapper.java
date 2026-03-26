@@ -20,7 +20,11 @@ public interface ShopMapper {
 	
 	public List<CommunityProfileVO> communityProfileList(UsersVO usersVO);
 	
-	public List<ArtistGroupVO> getTopArtistGoodsList(SysConfigInfoVO configKeyVO);
+	public List<ArtistGroupVO> artistGroupGoodsList(List<CommunityProfileVO> communityProfileVOList);
+	
+	public List<ArtistGroupVO> getTopArtistNameList(SysConfigInfoVO configKeyVO);
+
+	public List<GoodsVO> getTopArtistGoods(ArtistGroupVO artistGroupVO);
 	
 	public int getMyArtistTotal(UsersVO usersVO);
 	
@@ -29,10 +33,6 @@ public interface ShopMapper {
 	
 	
 	
-	
-	
-	
-	public List<ArtistGroupVO> artistGroupGoodsList(List<CommunityProfileVO> communityProfileVOList);
 	
 	public List<CommunityProfileVO> communityProfileBaseList();
 	
@@ -75,6 +75,5 @@ public interface ShopMapper {
 
 	public CommunityProfileVO findComProfileNoCheck(MemberShopVO memberShopVO);
 
-	
 	
 }
